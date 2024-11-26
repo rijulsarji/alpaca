@@ -1,24 +1,47 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './users.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private users: UsersService) {}
 
-  @Post('create')
-  async signupUser(@Body() userData: { name?: string; email: string }) {
-    return this.users.createUser(userData);
-  }
-
   @Get()
-  async findUsers(
-    @Query('searchString') searchString: string,
-    @Query('id') id: number,
+  async findAll(
+    @Query('id') id: string,
+    @Query('searchTerm') searchTerm: string,
   ) {
-    return this.users.users({
+    const filters = [];
+
+    if (id) {
+      filters.push({ id: { equals: id } });
+    }
+
+    if (searchTerm) {
+      filters.push(
+        { displayName: { contains: searchTerm } },
+        { username: { contains: searchTerm } },
+      );
+    }
+    return this.users.findAll({
       where: {
-        OR: [{ name: { contains: searchString } }, { id: { equals: +id } }],
+        OR: filters.length ? filters : undefined,
       },
     });
+  }
+
+  @Post('create')
+  @UsePipes(new ValidationPipe())
+  async signupUser(@Body() userData: CreateUserDto) {
+    return this.users.createOne(userData);
   }
 }
