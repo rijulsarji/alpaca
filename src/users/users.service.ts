@@ -11,7 +11,10 @@ export class UsersService {
   }
 
   async findAll(params: { where: Prisma.UserWhereInput }) {
-    return this.prisma.user.findMany({ where: params.where });
+    return this.prisma.user.findMany({
+      where: params.where,
+      include: { Awards: true, achievements: true },
+    });
   }
 
   async createOne(data: CreateUserDto) {
@@ -22,5 +25,9 @@ export class UsersService {
       displayImage: data.displayImage,
     };
     return this.prisma.user.create({ data });
+  }
+
+  async updateUser(data: CreateUserDto, id: string) {
+    return this.prisma.user.update({ where: { id }, data });
   }
 }

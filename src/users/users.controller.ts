@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UsePipes,
@@ -43,5 +44,10 @@ export class UsersController {
   @UsePipes(new ValidationPipe())
   async signupUser(@Body() userData: CreateUserDto) {
     return this.users.createOne(userData);
+  }
+
+  @Patch(':id')
+  async updateUser(@Param('id') id: string, @Body() updateUser: CreateUserDto) {
+    return this.users.updateUser(updateUser, id);
   }
 }
